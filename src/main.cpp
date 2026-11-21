@@ -12,6 +12,7 @@ struct Request {
     string description;
     string priority;
     string status;
+    string assignedStaff;
 };
 
 Request requests[100];
@@ -43,6 +44,7 @@ void submitRequest() {
     getline(cin, r.priority);
 
     r.status = "Pending";
+    r.assignedStaff = "Not Assigned";
 
     requests[requestCount] = r;
     requestCount++;
@@ -66,7 +68,9 @@ void viewRequests() {
         cout << "Description: " << requests[i].description << endl;
         cout << "Priority: " << requests[i].priority << endl;
         cout << "Status: " << requests[i].status << endl;
+        cout << "Assigned Staff: " << requests[i].assignedStaff << endl;
     }
+   
 }
 
 void searchRequest() {
@@ -91,6 +95,7 @@ void searchRequest() {
             cout << "Description: " << requests[i].description << endl;
             cout << "Priority: " << requests[i].priority << endl;
             cout << "Status: " << requests[i].status << endl;
+            cout << "Assigned Staff: " << requests[i].assignedStaff << endl;
             return;
         }
     }
@@ -149,6 +154,44 @@ void updateRequestStatus() {
     cout << "\nRequest ID not found!\n";
 }
 
+void assignStaff() {
+    if (requestCount == 0) {
+        cout << "\nNo requests available.\n";
+        return;
+    }
+
+    int searchID;
+
+    cout << "\nEnter Request ID: ";
+    cin >> searchID;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    for (int i = 0; i < requestCount; i++) {
+        if (requests[i].id == searchID) {
+
+            string staffName;
+
+            cout << "Enter Staff Member Name: ";
+            getline(cin, staffName);
+
+            if (staffName.empty()) {
+                cout << "\nStaff name cannot be empty!\n";
+                return;
+            }
+
+            requests[i].assignedStaff = staffName;
+
+            cout << "\nStaff assigned successfully!\n";
+            cout << "Assigned Staff: " << requests[i].assignedStaff << endl;
+
+            return;
+        }
+    }
+
+    cout << "\nRequest ID not found!\n";
+}
+
+
 
 
 int main() {
@@ -188,7 +231,7 @@ int main() {
                 break;
 
             case 5:
-                cout << "Staff assignment feature will be added next.\n";
+                assignStaff();
                 break;
 
             case 6:
