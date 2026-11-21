@@ -395,9 +395,21 @@ int main() {
         cout << "8. Generate Reports\n";
         cout << "9. Exit\n";
 
-        cout << "\nEnter your choice: ";
-        cin >> choice;
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        
+cout << "\nEnter your choice: ";
+
+if (!(cin >> choice)) {
+    cout << "\nInvalid input! Please enter a number.\n";
+
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    choice = 0;
+}
+else {
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+
 
         switch (choice) {
             case 1:
