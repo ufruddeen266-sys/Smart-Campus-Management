@@ -191,6 +191,40 @@ void assignStaff() {
     cout << "\nRequest ID not found!\n";
 }
 
+void closeRequest() {
+    if (requestCount == 0) {
+        cout << "\nNo requests available.\n";
+        return;
+    }
+
+    int closeID;
+
+    cout << "\nEnter Request ID to close: ";
+    cin >> closeID;
+
+    for (int i = 0; i < requestCount; i++) {
+        if (requests[i].id == closeID) {
+
+            if (requests[i].status == "Closed") {
+                cout << "\nThis request is already closed!\n";
+                return;
+            }
+
+            if (requests[i].status != "Resolved") {
+                cout << "\nOnly resolved requests can be closed.\n";
+                return;
+            }
+
+            requests[i].status = "Closed";
+
+            cout << "\nRequest closed successfully!\n";
+            return;
+        }
+    }
+
+    cout << "\nRequest ID not found!\n";
+}
+
 
 
 
@@ -235,7 +269,7 @@ int main() {
                 break;
 
             case 6:
-                cout << "Close request feature will be added next.\n";
+                closeRequest();
                 break;
 
             case 7:
