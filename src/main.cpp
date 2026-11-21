@@ -271,6 +271,45 @@ void emergencyManagement() {
     cout << "Status: Pending\n";
 }
 
+void generateReports() {
+    int pending = 0;
+    int inProgress = 0;
+    int resolved = 0;
+    int closed = 0;
+    int emergencies = 0;
+
+    for (int i = 0; i < requestCount; i++) {
+
+        if (requests[i].status == "Pending") {
+            pending++;
+        }
+        else if (requests[i].status == "In Progress") {
+            inProgress++;
+        }
+        else if (requests[i].status == "Resolved") {
+            resolved++;
+        }
+        else if (requests[i].status == "Closed") {
+            closed++;
+        }
+
+        if (requests[i].category == "Emergency") {
+            emergencies++;
+        }
+    }
+
+    cout << "\n===== CAMPUS OPERATIONS REPORT =====\n";
+
+    cout << "Total Requests: " << requestCount << endl;
+    cout << "Pending Requests: " << pending << endl;
+    cout << "In Progress Requests: " << inProgress << endl;
+    cout << "Resolved Requests: " << resolved << endl;
+    cout << "Closed Requests: " << closed << endl;
+    cout << "Total Emergencies: " << emergencies << endl;
+
+    cout << "====================================\n";
+}
+
 
 
 
@@ -323,7 +362,7 @@ int main() {
                 break;
 
             case 8:
-                cout << "Reports feature will be added next.\n";
+                generateReports();
                 break;
 
             case 9:
