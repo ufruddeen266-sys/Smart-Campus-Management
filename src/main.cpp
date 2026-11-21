@@ -2,6 +2,8 @@
 #include <iostream>
 #include <string>
 #include <limits>
+#include <fstream>
+#include <sstream>
 using namespace std;
 
 struct Request {
@@ -18,6 +20,69 @@ struct Request {
 
 Request requests[100];
 int requestCount = 0;
+
+void saveRequests() {
+    ofstream file("requests.txt");
+
+    if (!file) {
+        cout << "Error saving requests!\n";
+        return;
+    }
+
+    for (int i = 0; i < requestCount; i++) {
+        file << requests[i].id << "|"
+             << requests[i].studentName << "|"
+             << requests[i].department << "|"
+             << requests[i].category << "|"
+             << requests[i].description << "|"
+             << requests[i].priority << "|"
+             << requests[i].status << "|"
+             << requests[i].assignedStaff << "|"
+             << requests[i].location << "\n";
+    }
+
+    file.close();
+}
+
+void loadRequests() {
+    ifstream file("requests.txt");
+
+    if (!file) {
+        cout << "No previous records found. Starting new system.\n";
+        return;
+    }
+
+    string line;
+
+    while (getline(file, line) && requestCount < 100) {
+        stringstream ss(line);
+        string idText;
+        Request r;
+
+        getline(ss, idText, '|');
+
+        if (idText.empty()) {
+            continue;
+        }
+
+        r.id = stoi(idText);
+
+        getline(ss, r.studentName, '|');
+        getline(ss, r.department, '|');
+        getline(ss, r.category, '|');
+        getline(ss, r.description, '|');
+        getline(ss, r.priority, '|');
+        getline(ss, r.status, '|');
+        getline(ss, r.assignedStaff, '|');
+        getline(ss, r.location);
+
+        requests[requestCount] = r;
+        requestCount++;
+    }
+
+    file.close();
+}
+
 
 void submitRequest() {
     if (requestCount >= 100) {
@@ -49,6 +114,7 @@ void submitRequest() {
 
     requests[requestCount] = r;
     requestCount++;
+    saveRequests();
 
     cout << "\nRequest submitted successfully!\n";
     cout << "Your Request ID is: " << r.id << endl;
@@ -148,7 +214,7 @@ void updateRequestStatus() {
                     cout << "\nInvalid status choice!\n";
                     return;
             }
-
+            saveRequests();
             cout << "\nRequest status updated successfully!\n";
             return;
         }
@@ -183,7 +249,7 @@ void assignStaff() {
             }
 
             requests[i].assignedStaff = staffName;
-
+            saveRequests();
             cout << "\nStaff assigned successfully!\n";
             cout << "Assigned Staff: " << requests[i].assignedStaff << endl;
 
@@ -219,7 +285,7 @@ void closeRequest() {
             }
 
             requests[i].status = "Closed";
-
+            saveRequests();
             cout << "\nRequest closed successfully!\n";
             return;
         }
@@ -263,9 +329,11 @@ void emergencyManagement() {
     }
 
     requests[requestCount] = r;
-    requestCount++;
+requestCount++;
 
-    cout << "\nEMERGENCY REPORTED SUCCESSFULLY!\n";
+saveRequests();
+
+cout << "\nEMERGENCY REPORTED SUCCESSFULLY!\n";
     cout << "Emergency ID: " << r.id << endl;
     cout << "Priority: High\n";
     cout << "Status: Pending\n";
@@ -311,11 +379,10 @@ void generateReports() {
 }
 
 
-
-
 int main() {
     int choice;
 
+    loadRequests();
     do {
         cout << "\n===== SMART CAMPUS MANAGEMENT SYSTEM =====\n";
         cout << "1. Submit New Request\n";
