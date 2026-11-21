@@ -20,6 +20,29 @@ struct Request {
 
 Request requests[100];
 int requestCount = 0;
+void displayRequest(const Request &r) {
+    cout << "\n-------------------------\n";
+    cout << "Request ID: " << r.id << endl;
+    cout << "Student Name: " << r.studentName << endl;
+    cout << "Department: " << r.department << endl;
+    cout << "Category: " << r.category << endl;
+    cout << "Description: " << r.description << endl;
+    cout << "Priority: " << r.priority << endl;
+    cout << "Status: " << r.status << endl;
+    cout << "Assigned Staff: " << r.assignedStaff << endl;
+    cout << "Location: " << r.location << endl;
+}
+
+void displayRequest(int id) {
+    for (int i = 0; i < requestCount; i++) {
+        if (requests[i].id == id) {
+            displayRequest(requests[i]);
+            return;
+        }
+    }
+
+    cout << "\nRequest ID not found!\n";
+}
 
 void saveRequests() {
     ofstream file("requests.txt");
@@ -169,6 +192,7 @@ void viewRequests() {
    
 }
 
+
 void searchRequest() {
     if (requestCount == 0) {
         cout << "\nNo requests available.\n";
@@ -178,27 +202,19 @@ void searchRequest() {
     int searchID;
 
     cout << "\nEnter Request ID to search: ";
-    cin >> searchID;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-    for (int i = 0; i < requestCount; i++) {
-        if (requests[i].id == searchID) {
-            cout << "\nRequest Found!\n";
-            cout << "Request ID: " << requests[i].id << endl;
-            cout << "Student Name: " << requests[i].studentName << endl;
-            cout << "Department: " << requests[i].department << endl;
-            cout << "Category: " << requests[i].category << endl;
-            cout << "Description: " << requests[i].description << endl;
-            cout << "Priority: " << requests[i].priority << endl;
-            cout << "Status: " << requests[i].status << endl;
-            cout << "Assigned Staff: " << requests[i].assignedStaff << endl;
-            cout << "Location: " << requests[i].location << endl;
-            return;
-        }
+    if (!(cin >> searchID)) {
+        cout << "\nInvalid Request ID!\n";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        return;
     }
 
-    cout << "\nRequest ID not found!\n";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    displayRequest(searchID);
 }
+
 
 void updateRequestStatus() {
     if (requestCount == 0) {
