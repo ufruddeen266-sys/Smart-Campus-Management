@@ -98,6 +98,58 @@ void searchRequest() {
     cout << "\nRequest ID not found!\n";
 }
 
+void updateRequestStatus() {
+    if (requestCount == 0) {
+        cout << "\nNo requests available.\n";
+        return;
+    }
+
+    int updateID;
+
+    cout << "\nEnter Request ID: ";
+    cin >> updateID;
+
+    for (int i = 0; i < requestCount; i++) {
+        if (requests[i].id == updateID) {
+
+            cout << "\nCurrent Status: " << requests[i].status << endl;
+
+            cout << "\nSelect New Status:\n";
+            cout << "1. Pending\n";
+            cout << "2. In Progress\n";
+            cout << "3. Resolved\n";
+
+            int statusChoice;
+            cout << "Enter choice: ";
+            cin >> statusChoice;
+
+            switch (statusChoice) {
+                case 1:
+                    requests[i].status = "Pending";
+                    break;
+
+                case 2:
+                    requests[i].status = "In Progress";
+                    break;
+
+                case 3:
+                    requests[i].status = "Resolved";
+                    break;
+
+                default:
+                    cout << "\nInvalid status choice!\n";
+                    return;
+            }
+
+            cout << "\nRequest status updated successfully!\n";
+            return;
+        }
+    }
+
+    cout << "\nRequest ID not found!\n";
+}
+
+
 
 int main() {
     int choice;
@@ -128,12 +180,11 @@ int main() {
                 break;
 
             case 3:
-               case 3:
                   searchRequest();
                 break;
 
             case 4:
-                cout << "Update status feature will be added next.\n";
+                updateRequestStatus();
                 break;
 
             case 5:
