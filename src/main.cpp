@@ -69,6 +69,36 @@ void viewRequests() {
     }
 }
 
+void searchRequest() {
+    if (requestCount == 0) {
+        cout << "\nNo requests available.\n";
+        return;
+    }
+
+    int searchID;
+
+    cout << "\nEnter Request ID to search: ";
+    cin >> searchID;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    for (int i = 0; i < requestCount; i++) {
+        if (requests[i].id == searchID) {
+            cout << "\nRequest Found!\n";
+            cout << "Request ID: " << requests[i].id << endl;
+            cout << "Student Name: " << requests[i].studentName << endl;
+            cout << "Department: " << requests[i].department << endl;
+            cout << "Category: " << requests[i].category << endl;
+            cout << "Description: " << requests[i].description << endl;
+            cout << "Priority: " << requests[i].priority << endl;
+            cout << "Status: " << requests[i].status << endl;
+            return;
+        }
+    }
+
+    cout << "\nRequest ID not found!\n";
+}
+
+
 int main() {
     int choice;
 
@@ -98,7 +128,8 @@ int main() {
                 break;
 
             case 3:
-                cout << "Search feature will be added next.\n";
+               case 3:
+                  searchRequest();
                 break;
 
             case 4:
