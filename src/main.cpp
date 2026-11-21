@@ -83,6 +83,18 @@ void loadRequests() {
     file.close();
 }
 
+int countHighPriorityRequests(int index) {
+    if (index == requestCount) {
+        return 0;
+    }
+
+    if (requests[index].priority == "High") {
+        return 1 + countHighPriorityRequests(index + 1);
+    }
+
+    return countHighPriorityRequests(index + 1);
+}
+
 
 void submitRequest() {
     if (requestCount >= 100) {
@@ -390,7 +402,8 @@ void generateReports() {
     cout << "Resolved Requests: " << resolved << endl;
     cout << "Closed Requests: " << closed << endl;
     cout << "Total Emergencies: " << emergencies << endl;
-
+    cout << "High Priority Requests: "
+     << countHighPriorityRequests(0) << endl;
     cout << "====================================\n";
 }
 
