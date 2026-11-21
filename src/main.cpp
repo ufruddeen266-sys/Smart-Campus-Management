@@ -13,6 +13,7 @@ struct Request {
     string priority;
     string status;
     string assignedStaff;
+    string location;
 };
 
 Request requests[100];
@@ -69,6 +70,7 @@ void viewRequests() {
         cout << "Priority: " << requests[i].priority << endl;
         cout << "Status: " << requests[i].status << endl;
         cout << "Assigned Staff: " << requests[i].assignedStaff << endl;
+        cout << "Location: " << requests[i].location << endl;
     }
    
 }
@@ -96,6 +98,7 @@ void searchRequest() {
             cout << "Priority: " << requests[i].priority << endl;
             cout << "Status: " << requests[i].status << endl;
             cout << "Assigned Staff: " << requests[i].assignedStaff << endl;
+            cout << "Location: " << requests[i].location << endl;
             return;
         }
     }
@@ -225,6 +228,49 @@ void closeRequest() {
     cout << "\nRequest ID not found!\n";
 }
 
+void emergencyManagement() {
+    if (requestCount >= 100) {
+        cout << "\nRequest storage is full!\n";
+        return;
+    }
+
+    Request r;
+
+    r.id = requestCount + 1;
+    r.category = "Emergency";
+    r.priority = "High";
+    r.status = "Pending";
+    r.assignedStaff = "Not Assigned";
+
+    cout << "\n===== EMERGENCY MANAGEMENT =====\n";
+
+    cout << "Enter Your Name: ";
+    getline(cin, r.studentName);
+
+    cout << "Enter Department: ";
+    getline(cin, r.department);
+
+    cout << "Emergency Type (Medical/Fire/Electrical/Security): ";
+    getline(cin, r.description);
+
+    cout << "Enter Emergency Location: ";
+    getline(cin, r.location);
+
+    if (r.studentName.empty() || r.location.empty() ||
+        r.description.empty()) {
+        cout << "\nRequired information cannot be empty!\n";
+        return;
+    }
+
+    requests[requestCount] = r;
+    requestCount++;
+
+    cout << "\nEMERGENCY REPORTED SUCCESSFULLY!\n";
+    cout << "Emergency ID: " << r.id << endl;
+    cout << "Priority: High\n";
+    cout << "Status: Pending\n";
+}
+
 
 
 
@@ -273,7 +319,7 @@ int main() {
                 break;
 
             case 7:
-                cout << "Emergency management feature will be added next.\n";
+                emergencyManagement();
                 break;
 
             case 8:
