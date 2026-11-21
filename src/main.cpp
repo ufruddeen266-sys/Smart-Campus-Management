@@ -106,11 +106,27 @@ void submitRequest() {
     cout << "Enter Description: ";
     getline(cin, r.description);
 
-    cout << "Enter Priority (Low/Medium/High): ";
-    getline(cin, r.priority);
+  
+cout << "Enter Priority (Low/Medium/High): ";
+getline(cin, r.priority);
 
-    r.status = "Pending";
-    r.assignedStaff = "Not Assigned";
+if (r.studentName.empty() || r.department.empty() ||
+    r.category.empty() || r.description.empty()) {
+    cout << "\nError: All fields are required!\n";
+    return;
+}
+
+if (r.priority != "Low" &&
+    r.priority != "Medium" &&
+    r.priority != "High") {
+    cout << "\nInvalid priority! Enter Low, Medium, or High.\n";
+    return;
+}
+
+r.status = "Pending";
+r.assignedStaff = "Not Assigned";
+r.location = "";
+
 
     requests[requestCount] = r;
     requestCount++;
