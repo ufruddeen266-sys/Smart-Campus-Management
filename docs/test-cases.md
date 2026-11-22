@@ -1,3 +1,4 @@
+
 # Smart Campus Management System — Test Cases
 
 ## 1. Functional Testing
@@ -16,6 +17,12 @@
 | TC-10 | Close a pending request | System prevents closure |
 | TC-11 | Submit an emergency | Emergency recorded with High priority |
 | TC-12 | Generate reports | Request statistics displayed |
+| TC-13 | Record campus resource usage | Resource usage recorded |
+| TC-14 | Display resource matrix | Two-dimensional matrix displayed |
+| TC-15 | Filter requests by High priority | Only High priority requests displayed |
+| TC-16 | Filter requests with no matching priority | No matching requests message displayed |
+| TC-17 | Enter invalid building number | Error message displayed |
+| TC-18 | Enter invalid time slot | Error message displayed |
 
 ## 2. Input Validation Testing
 
@@ -24,13 +31,32 @@
 - Enter an empty student name.
 - Enter an invalid priority.
 - Search for a request ID that does not exist.
+- Enter an invalid building number.
+- Enter an invalid resource time slot.
+- Enter an empty staff name.
+- Enter a description containing the restricted file delimiter.
 
 ## 3. File Handling Testing
 
 - Start the system without an existing requests.txt file.
 - Save a new request.
 - Restart the program and check whether the request loads again.
+- Load records containing invalid data.
+- Check that duplicate request IDs are skipped.
 
-## 4. Conclusion
+## 4. Programming Concepts Testing
 
-These test cases are designed to verify the main functions, input validation, emergency management, and file handling of the Smart Campus Management System.
+- Test all four function categories.
+- Test recursive high-priority request counting.
+- Test function overloading.
+- Test one-dimensional request storage.
+- Test two-dimensional campus resource matrix.
+- Test nested structures for building and room information.
+- Test pointer-based dynamic memory allocation.
+- Verify dynamic memory is released using delete[].
+- Test structure passing by value and reference.
+- Test nested loops in the resource matrix.
+
+## 5. Conclusion
+
+These test cases verify the functional features, input validation, file handling, emergency management, campus resource matrix, and C++ programming concepts implemented in the Smart Campus Management System.
