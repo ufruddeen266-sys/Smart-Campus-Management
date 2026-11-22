@@ -1,3 +1,4 @@
+
 # Compiled C++ files
 *.exe
 *.out
@@ -6,7 +7,10 @@
 
 # Temporary files
 *.tmp
-*.bak
+*.log
+
+# Request data files
+requests.txt
 
 # IDE files
 .vscode/
