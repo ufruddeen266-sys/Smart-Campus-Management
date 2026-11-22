@@ -1,56 +1,90 @@
+
 # Smart Campus Operations and Emergency Response Management System
 
+## Project Information
+
+**Course:** Computer Programming Lab  
+**Project Type:** C++ Programming Project  
+**Program:** BS Robotics and Intelligent Systems  
+**University:** Bahria University Islamabad  
+**Semester:** 2nd Semester
+
 ## Project Description
-The Smart Campus Operations and Emergency Response Management System is a menu-driven C++ application designed to manage campus requests, maintenance issues, technical faults, and emergency situations.
 
-The system helps students report problems and allows campus staff to track, update, and manage requests efficiently.
+The Smart Campus Operations and Emergency Response Management System is a C++ based application designed to manage campus maintenance requests, technical issues, student complaints, and emergency reports.
 
-## Features
-- Submit new campus requests
-- View all submitted requests
-- Search requests using Request ID
-- Update request status
-- Assign staff members
-- Close resolved requests
-- Report campus emergencies
-- Generate operational reports
-- Count high-priority requests using recursion
-- Save and load request records using file handling
+The system provides a menu-driven interface that allows users to submit requests, track their status, assign staff members, and generate operational reports.
+
+## Main Features
+
+- Submit New Requests
+- View All Requests
+- Search Requests
+- Update Request Status
+- Assign Staff Members
+- Close Resolved Requests
+- Emergency Management
+- Generate Campus Reports
+- Campus Resource Usage Matrix
+- Filter Requests by Priority
+
+## Programming Concepts Used
+
+- Conditional Statements
+- Loops and Nested Loops
+- Functions and Function Overloading
+- Recursion
+- One-Dimensional and Two-Dimensional Arrays
+- Structures and Nested Structures
+- Pointers and Dynamic Memory Allocation
+- Strings
+- File Handling
+- Input Validation
+- Passing Structures by Value and Reference
 
 ## Technologies Used
+
 - C++
-- Object-Oriented Programming Concepts
-- Structures
-- Functions and Function Overloading
-- Arrays
-- Recursion
-- File Handling
-- Pointers and Dynamic Memory Allocation (to be added)
+- Standard C++ Libraries
+- Online C++ Compiler
+- GitHub for Version Control and Documentation
 
 ## Project Structure
+
 ```text
 Smart-Campus-Management/
+│
+├── README.md
 │
 ├── src/
 │   └── main.cpp
 │
-├── README.md
-└── requests.txt
+├── docs/
+│   ├── project-documentation.md
+│   ├── test-cases.md
+│   ├── flowchart-and-pseudocode.md
+│   ├── project-screenshots.md
+│   └── programming-concepts.md
+│
+└── .gitignore
 ```
 
 ## How to Run
-1. Open the project in a C++ compiler.
-2. Compile `main.cpp`.
-3. Run the generated executable.
+
+1. Open `src/main.cpp`.
+2. Copy the source code into a C++ compiler.
+3. Compile and execute the program.
 4. Select an option from the main menu.
 
 ## Data Storage
-The system uses `requests.txt` to store campus request records so that data can be loaded when the program starts.
 
-## Project Objective
-To develop a simple and efficient campus management solution that improves request handling, maintenance reporting, and emergency response.
+The application uses a text file named `requests.txt` to save and load request records.
 
-## Academic Project
-**Course:** Computer Programming Lab  
-**Program:** BS Robotics and Intelligent Systems  
-**Project:** Smart Campus Operations and Emergency Response Management System
+## Documentation
+
+Detailed project documentation, test cases, flowcharts, pseudocode, programming concepts, and screenshots are available in the `docs` folder.
+
+## Conclusion
+
+This project applies fundamental C++ programming concepts to a practical campus management scenario, combining routine campus operations with emergency response management.
+```
