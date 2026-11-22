@@ -1,0 +1,17 @@
+# Compiled C++ files
+*.exe
+*.out
+*.o
+*.obj
+
+# Temporary files
+*.tmp
+*.bak
+
+# IDE files
+.vscode/
+.idea/
+
+# Operating system files
+.DS_Store
+Thumbs.db
