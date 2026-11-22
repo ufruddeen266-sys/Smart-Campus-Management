@@ -4,7 +4,13 @@
 #include <limits>
 #include <fstream>
 #include <sstream>
+#include <new>
 using namespace std;
+
+struct Location {
+    string building;
+    string room;
+};
 
 struct Request {
     int id;
@@ -15,13 +21,120 @@ struct Request {
     string priority;
     string status;
     string assignedStaff;
-    string location;
+    Location location;
 };
 
 Request requests[100];
 int requestCount = 0;
+int nextRequestId = 1;
+
+// Function Category 1: No parameters, no return value
+void showWelcome() {
+    cout << "\n========================================\n";
+    cout << "     SMART CAMPUS MANAGEMENT SYSTEM\n";
+    cout << "========================================\n";
+}
+
+// Function Category 2: Parameters, no return value
+void printSeparator(string symbol, int count) {
+    for (int i = 0; i < count; i++) {
+        cout << symbol;
+    }
+    cout << endl;
+}
+
+// Function Category 3: No parameters, returns a value
+int getMenuChoice() {
+    int choice;
+
+    cout << "\n1. Submit New Request\n";
+    cout << "2. View All Requests\n";
+    cout << "3. Search Request\n";
+    cout << "4. Update Request Status\n";
+    cout << "5. Assign Staff\n";
+    cout << "6. Close Request\n";
+    cout << "7. Emergency Management\n";
+    cout << "8. Generate Reports\n";
+    cout << "9. Campus Resource Matrix\n";
+    cout << "10. View Requests by Priority\n";
+    cout << "11. Exit\n";
+
+    cout << "\nEnter your choice: ";
+
+    while (!(cin >> choice)) {
+        cout << "Invalid input! Enter a number: ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    return choice;
+}
+
+// Function Category 4: Parameters, returns a value
+int findRequestIndex(int id) {
+    for (int i = 0; i < requestCount; i++) {
+        if (requests[i].id == id) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+string readText(string prompt) {
+    string value;
+
+    while (true) {
+        cout << prompt;
+        getline(cin, value);
+
+        if (value.empty()) {
+            cout << "This field cannot be empty!\n";
+        }
+        else if (value.find('|') != string::npos) {
+            cout << "The | character is not allowed!\n";
+        }
+        else {
+            return value;
+        }
+    }
+}
+
+int readNumber(string prompt) {
+    int number;
+
+    cout << prompt;
+
+    while (!(cin >> number)) {
+        cout << "Invalid input! Enter a number: ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    return number;
+}
+
+// Structure passed by value
+void printRequestSummary(Request r) {
+    cout << "\nRequest ID: " << r.id;
+    cout << "\nStudent: " << r.studentName;
+    cout << "\nCategory: " << r.category;
+    cout << "\nPriority: " << r.priority;
+    cout << "\nStatus: " << r.status << endl;
+}
+
+// Structure passed by reference
+void updateLocation(Request &r) {
+    r.location.building = readText("Enter Building: ");
+    r.location.room = readText("Enter Room Number: ");
+}
+
+// Function Overloading: Version 1
 void displayRequest(const Request &r) {
-    cout << "\n-------------------------\n";
+    printSeparator("-", 35);
+
     cout << "Request ID: " << r.id << endl;
     cout << "Student Name: " << r.studentName << endl;
     cout << "Department: " << r.department << endl;
@@ -30,25 +143,29 @@ void displayRequest(const Request &r) {
     cout << "Priority: " << r.priority << endl;
     cout << "Status: " << r.status << endl;
     cout << "Assigned Staff: " << r.assignedStaff << endl;
-    cout << "Location: " << r.location << endl;
+    cout << "Building: " << r.location.building << endl;
+    cout << "Room: " << r.location.room << endl;
+
+    printSeparator("-", 35);
 }
 
+// Function Overloading: Version 2
 void displayRequest(int id) {
-    for (int i = 0; i < requestCount; i++) {
-        if (requests[i].id == id) {
-            displayRequest(requests[i]);
-            return;
-        }
-    }
+    int index = findRequestIndex(id);
 
-    cout << "\nRequest ID not found!\n";
+    if (index != -1) {
+        displayRequest(requests[index]);
+    }
+    else {
+        cout << "\nRequest ID not found!\n";
+    }
 }
 
 void saveRequests() {
     ofstream file("requests.txt");
 
     if (!file) {
-        cout << "Error saving requests!\n";
+        cout << "\nError saving requests! Check file access.\n";
         return;
     }
 
@@ -61,7 +178,8 @@ void saveRequests() {
              << requests[i].priority << "|"
              << requests[i].status << "|"
              << requests[i].assignedStaff << "|"
-             << requests[i].location << "\n";
+             << requests[i].location.building << "|"
+             << requests[i].location.room << "\n";
     }
 
     file.close();
@@ -71,43 +189,68 @@ void loadRequests() {
     ifstream file("requests.txt");
 
     if (!file) {
-        cout << "No previous records found. Starting new system.\n";
+        cout << "\nNo previous records found. Starting new system.\n";
         return;
     }
 
     string line;
+    int maximumID = 0;
 
     while (getline(file, line) && requestCount < 100) {
         stringstream ss(line);
-        string idText;
         Request r;
+        string idText;
 
-        getline(ss, idText, '|');
-
-        if (idText.empty()) {
+        if (!getline(ss, idText, '|')) {
             continue;
         }
 
-        r.id = stoi(idText);
+        try {
+            size_t position;
+            r.id = stoi(idText, &position);
 
-        getline(ss, r.studentName, '|');
-        getline(ss, r.department, '|');
-        getline(ss, r.category, '|');
-        getline(ss, r.description, '|');
-        getline(ss, r.priority, '|');
-        getline(ss, r.status, '|');
-        getline(ss, r.assignedStaff, '|');
-        getline(ss, r.location);
+            if (position != idText.length() || r.id <= 0) {
+                continue;
+            }
+        }
+        catch (...) {
+            continue;
+        }
+
+        if (!getline(ss, r.studentName, '|') ||
+            !getline(ss, r.department, '|') ||
+            !getline(ss, r.category, '|') ||
+            !getline(ss, r.description, '|') ||
+            !getline(ss, r.priority, '|') ||
+            !getline(ss, r.status, '|') ||
+            !getline(ss, r.assignedStaff, '|') ||
+            !getline(ss, r.location.building, '|') ||
+            !getline(ss, r.location.room)) {
+            continue;
+        }
+
+        if (findRequestIndex(r.id) != -1) {
+            continue;
+        }
 
         requests[requestCount] = r;
         requestCount++;
+
+        if (r.id > maximumID) {
+            maximumID = r.id;
+        }
     }
 
+    nextRequestId = maximumID + 1;
+
     file.close();
+
+    cout << "\nPrevious records loaded successfully.\n";
 }
 
+// Recursive function
 int countHighPriorityRequests(int index) {
-    if (index == requestCount) {
+    if (index >= requestCount) {
         return 0;
     }
 
@@ -118,57 +261,47 @@ int countHighPriorityRequests(int index) {
     return countHighPriorityRequests(index + 1);
 }
 
-
 void submitRequest() {
     if (requestCount >= 100) {
-        cout << "Request storage is full!\n";
+        cout << "\nRequest storage is full!\n";
         return;
     }
 
     Request r;
 
-    r.id = requestCount + 1;
+    r.id = nextRequestId++;
 
-    cout << "\nEnter Student Name: ";
-    getline(cin, r.studentName);
+    cout << "\n===== SUBMIT NEW REQUEST =====\n";
 
-    cout << "Enter Department: ";
-    getline(cin, r.department);
+    r.studentName = readText("Enter Student Name: ");
+    r.department = readText("Enter Department: ");
+    r.category = readText("Enter Category: ");
+    r.description = readText("Enter Description: ");
 
-    cout << "Enter Category (Maintenance/Technical/Medical/Other): ";
-    getline(cin, r.category);
+    while (true) {
+        r.priority = readText("Enter Priority (Low/Medium/High): ");
 
-    cout << "Enter Description: ";
-    getline(cin, r.description);
+        if (r.priority == "Low" ||
+            r.priority == "Medium" ||
+            r.priority == "High") {
+            break;
+        }
 
-  
-cout << "Enter Priority (Low/Medium/High): ";
-getline(cin, r.priority);
+        cout << "Invalid priority! Try again.\n";
+    }
 
-if (r.studentName.empty() || r.department.empty() ||
-    r.category.empty() || r.description.empty()) {
-    cout << "\nError: All fields are required!\n";
-    return;
-}
+    updateLocation(r);
 
-if (r.priority != "Low" &&
-    r.priority != "Medium" &&
-    r.priority != "High") {
-    cout << "\nInvalid priority! Enter Low, Medium, or High.\n";
-    return;
-}
-
-r.status = "Pending";
-r.assignedStaff = "Not Assigned";
-r.location = "";
-
+    r.status = "Pending";
+    r.assignedStaff = "Not Assigned";
 
     requests[requestCount] = r;
     requestCount++;
+
     saveRequests();
 
     cout << "\nRequest submitted successfully!\n";
-    cout << "Your Request ID is: " << r.id << endl;
+    cout << "Your Request ID: " << r.id << endl;
 }
 
 void viewRequests() {
@@ -178,20 +311,9 @@ void viewRequests() {
     }
 
     for (int i = 0; i < requestCount; i++) {
-        cout << "\n-------------------------\n";
-        cout << "Request ID: " << requests[i].id << endl;
-        cout << "Student Name: " << requests[i].studentName << endl;
-        cout << "Department: " << requests[i].department << endl;
-        cout << "Category: " << requests[i].category << endl;
-        cout << "Description: " << requests[i].description << endl;
-        cout << "Priority: " << requests[i].priority << endl;
-        cout << "Status: " << requests[i].status << endl;
-        cout << "Assigned Staff: " << requests[i].assignedStaff << endl;
-        cout << "Location: " << requests[i].location << endl;
+        displayRequest(requests[i]);
     }
-   
 }
-
 
 void searchRequest() {
     if (requestCount == 0) {
@@ -199,143 +321,88 @@ void searchRequest() {
         return;
     }
 
-    int searchID;
-
-    cout << "\nEnter Request ID to search: ";
-
-    if (!(cin >> searchID)) {
-        cout << "\nInvalid Request ID!\n";
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        return;
-    }
-
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-    displayRequest(searchID);
+    int id = readNumber("\nEnter Request ID: ");
+    displayRequest(id);
 }
 
-
 void updateRequestStatus() {
-    if (requestCount == 0) {
-        cout << "\nNo requests available.\n";
+    int id = readNumber("\nEnter Request ID: ");
+    int index = findRequestIndex(id);
+
+    if (index == -1) {
+        cout << "\nRequest ID not found!\n";
         return;
     }
 
-    int updateID;
+    cout << "\n1. Pending\n";
+    cout << "2. In Progress\n";
+    cout << "3. Resolved\n";
 
-    cout << "\nEnter Request ID: ";
-    cin >> updateID;
+    int choice = readNumber("Select New Status: ");
 
-    for (int i = 0; i < requestCount; i++) {
-        if (requests[i].id == updateID) {
+    switch (choice) {
+        case 1:
+            requests[index].status = "Pending";
+            break;
 
-            cout << "\nCurrent Status: " << requests[i].status << endl;
+        case 2:
+            requests[index].status = "In Progress";
+            break;
 
-            cout << "\nSelect New Status:\n";
-            cout << "1. Pending\n";
-            cout << "2. In Progress\n";
-            cout << "3. Resolved\n";
+        case 3:
+            requests[index].status = "Resolved";
+            break;
 
-            int statusChoice;
-            cout << "Enter choice: ";
-            cin >> statusChoice;
-
-            switch (statusChoice) {
-                case 1:
-                    requests[i].status = "Pending";
-                    break;
-
-                case 2:
-                    requests[i].status = "In Progress";
-                    break;
-
-                case 3:
-                    requests[i].status = "Resolved";
-                    break;
-
-                default:
-                    cout << "\nInvalid status choice!\n";
-                    return;
-            }
-            saveRequests();
-            cout << "\nRequest status updated successfully!\n";
+        default:
+            cout << "\nInvalid status choice!\n";
             return;
-        }
     }
 
-    cout << "\nRequest ID not found!\n";
+    saveRequests();
+    cout << "\nStatus updated successfully!\n";
 }
 
 void assignStaff() {
-    if (requestCount == 0) {
-        cout << "\nNo requests available.\n";
+    int id = readNumber("\nEnter Request ID: ");
+    int index = findRequestIndex(id);
+
+    if (index == -1) {
+        cout << "\nRequest ID not found!\n";
         return;
     }
 
-    int searchID;
+    requests[index].assignedStaff =
+        readText("Enter Staff Member Name: ");
 
-    cout << "\nEnter Request ID: ";
-    cin >> searchID;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    saveRequests();
 
-    for (int i = 0; i < requestCount; i++) {
-        if (requests[i].id == searchID) {
-
-            string staffName;
-
-            cout << "Enter Staff Member Name: ";
-            getline(cin, staffName);
-
-            if (staffName.empty()) {
-                cout << "\nStaff name cannot be empty!\n";
-                return;
-            }
-
-            requests[i].assignedStaff = staffName;
-            saveRequests();
-            cout << "\nStaff assigned successfully!\n";
-            cout << "Assigned Staff: " << requests[i].assignedStaff << endl;
-
-            return;
-        }
-    }
-
-    cout << "\nRequest ID not found!\n";
+    cout << "\nStaff assigned successfully!\n";
 }
 
 void closeRequest() {
-    if (requestCount == 0) {
-        cout << "\nNo requests available.\n";
+    int id = readNumber("\nEnter Request ID: ");
+    int index = findRequestIndex(id);
+
+    if (index == -1) {
+        cout << "\nRequest ID not found!\n";
         return;
     }
 
-    int closeID;
-
-    cout << "\nEnter Request ID to close: ";
-    cin >> closeID;
-
-    for (int i = 0; i < requestCount; i++) {
-        if (requests[i].id == closeID) {
-
-            if (requests[i].status == "Closed") {
-                cout << "\nThis request is already closed!\n";
-                return;
-            }
-
-            if (requests[i].status != "Resolved") {
-                cout << "\nOnly resolved requests can be closed.\n";
-                return;
-            }
-
-            requests[i].status = "Closed";
-            saveRequests();
-            cout << "\nRequest closed successfully!\n";
-            return;
-        }
+    if (requests[index].status == "Closed") {
+        cout << "\nThis request is already closed!\n";
+        return;
     }
 
-    cout << "\nRequest ID not found!\n";
+    if (requests[index].status != "Resolved") {
+        cout << "\nOnly resolved requests can be closed.\n";
+        return;
+    }
+
+    requests[index].status = "Closed";
+
+    saveRequests();
+
+    cout << "\nRequest closed successfully!\n";
 }
 
 void emergencyManagement() {
@@ -346,7 +413,7 @@ void emergencyManagement() {
 
     Request r;
 
-    r.id = requestCount + 1;
+    r.id = nextRequestId++;
     r.category = "Emergency";
     r.priority = "High";
     r.status = "Pending";
@@ -354,33 +421,19 @@ void emergencyManagement() {
 
     cout << "\n===== EMERGENCY MANAGEMENT =====\n";
 
-    cout << "Enter Your Name: ";
-    getline(cin, r.studentName);
+    r.studentName = readText("Enter Your Name: ");
+    r.department = readText("Enter Department: ");
+    r.description = readText("Enter Emergency Type: ");
 
-    cout << "Enter Department: ";
-    getline(cin, r.department);
-
-    cout << "Emergency Type (Medical/Fire/Electrical/Security): ";
-    getline(cin, r.description);
-
-    cout << "Enter Emergency Location: ";
-    getline(cin, r.location);
-
-    if (r.studentName.empty() || r.location.empty() ||
-        r.description.empty()) {
-        cout << "\nRequired information cannot be empty!\n";
-        return;
-    }
+    updateLocation(r);
 
     requests[requestCount] = r;
-requestCount++;
+    requestCount++;
 
-saveRequests();
+    saveRequests();
 
-cout << "\nEMERGENCY REPORTED SUCCESSFULLY!\n";
+    cout << "\nEMERGENCY REPORTED SUCCESSFULLY!\n";
     cout << "Emergency ID: " << r.id << endl;
-    cout << "Priority: High\n";
-    cout << "Status: Pending\n";
 }
 
 void generateReports() {
@@ -391,7 +444,6 @@ void generateReports() {
     int emergencies = 0;
 
     for (int i = 0; i < requestCount; i++) {
-
         if (requests[i].status == "Pending") {
             pending++;
         }
@@ -418,43 +470,122 @@ void generateReports() {
     cout << "Resolved Requests: " << resolved << endl;
     cout << "Closed Requests: " << closed << endl;
     cout << "Total Emergencies: " << emergencies << endl;
+
     cout << "High Priority Requests: "
-     << countHighPriorityRequests(0) << endl;
-    cout << "====================================\n";
+         << countHighPriorityRequests(0) << endl;
+
+    printSeparator("=", 38);
 }
 
+// 2D array and nested loops
+void campusResourceMatrix() {
+    static int resourceUsage[3][4] = {};
+
+    cout << "\n===== CAMPUS RESOURCE USAGE MATRIX =====\n";
+    cout << "Buildings: 1, 2, 3\n";
+    cout << "Time Slots: 1, 2, 3, 4\n";
+
+    cout << "\n1. Record Resource Usage\n";
+    cout << "2. Display Resource Matrix\n";
+
+    int choice = readNumber("Enter choice: ");
+
+    if (choice == 1) {
+        int building = readNumber("Enter Building Number (1-3): ");
+        int slot = readNumber("Enter Time Slot (1-4): ");
+
+        if (building < 1 || building > 3 ||
+            slot < 1 || slot > 4) {
+            cout << "\nInvalid building or time slot!\n";
+            return;
+        }
+
+        resourceUsage[building - 1][slot - 1]++;
+
+        cout << "\nResource usage recorded successfully!\n";
+    }
+    else if (choice == 2) {
+        cout << "\nBuilding\t";
+
+        for (int j = 0; j < 4; j++) {
+            cout << "Slot " << j + 1 << "\t";
+        }
+
+        cout << endl;
+
+        // Nested loops
+        for (int i = 0; i < 3; i++) {
+            cout << "Building " << i + 1 << "\t";
+
+            for (int j = 0; j < 4; j++) {
+                cout << resourceUsage[i][j] << "\t";
+            }
+
+            cout << endl;
+        }
+    }
+    else {
+        cout << "\nInvalid choice!\n";
+    }
+}
+
+// Pointers and dynamic memory allocation
+void viewRequestsByPriority() {
+    if (requestCount == 0) {
+        cout << "\nNo requests available.\n";
+        return;
+    }
+
+    string priority = readText(
+        "\nEnter Priority to filter (Low/Medium/High): "
+    );
+
+    if (priority != "Low" &&
+        priority != "Medium" &&
+        priority != "High") {
+        cout << "\nInvalid priority!\n";
+        return;
+    }
+
+    // Dynamically allocate memory using a pointer
+    Request* filteredRequests = new Request[requestCount];
+
+    int filteredCount = 0;
+
+    for (int i = 0; i < requestCount; i++) {
+        if (requests[i].priority == priority) {
+            filteredRequests[filteredCount] = requests[i];
+            filteredCount++;
+        }
+    }
+
+    cout << "\n===== FILTERED REQUESTS =====\n";
+
+    if (filteredCount == 0) {
+        cout << "No requests found for this priority.\n";
+    }
+    else {
+        for (int i = 0; i < filteredCount; i++) {
+            displayRequest(filteredRequests[i]);
+        }
+    }
+
+    // Safely release dynamically allocated memory
+    delete[] filteredRequests;
+    filteredRequests = nullptr;
+}
 
 int main() {
-    int choice;
+    showWelcome();
 
     loadRequests();
+
+    int choice;
+
     do {
-        cout << "\n===== SMART CAMPUS MANAGEMENT SYSTEM =====\n";
-        cout << "1. Submit New Request\n";
-        cout << "2. View All Requests\n";
-        cout << "3. Search Request\n";
-        cout << "4. Update Request Status\n";
-        cout << "5. Assign Staff\n";
-        cout << "6. Close Request\n";
-        cout << "7. Emergency Management\n";
-        cout << "8. Generate Reports\n";
-        cout << "9. Exit\n";
+        showWelcome();
 
-        
-cout << "\nEnter your choice: ";
-
-if (!(cin >> choice)) {
-    cout << "\nInvalid input! Please enter a number.\n";
-
-    cin.clear();
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-    choice = 0;
-}
-else {
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-}
-
+        choice = getMenuChoice();
 
         switch (choice) {
             case 1:
@@ -466,7 +597,7 @@ else {
                 break;
 
             case 3:
-                  searchRequest();
+                searchRequest();
                 break;
 
             case 4:
@@ -490,14 +621,22 @@ else {
                 break;
 
             case 9:
-                cout << "Thank you for using Smart Campus System!\n";
+                campusResourceMatrix();
+                break;
+
+            case 10:
+                viewRequestsByPriority();
+                break;
+
+            case 11:
+                cout << "\nThank you for using Smart Campus System!\n";
                 break;
 
             default:
-                cout << "Invalid choice! Try again.\n";
+                cout << "\nInvalid choice! Please try again.\n";
         }
 
-    } while (choice != 9);
+    } while (choice != 11);
 
     return 0;
 }
